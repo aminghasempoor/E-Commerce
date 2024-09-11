@@ -9,8 +9,16 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {getKindeServerSession, LoginLink} from "@kinde-oss/kinde-auth-nextjs/server";
+import {redirect} from "next/navigation";
+import React from "react";
 
-export default function DashboardLayout(){
+export default async function DashboardLayout({children} : {children : React.ReactNode}){
+    const {getUser} = getKindeServerSession()
+    const user = await getUser()
+    // if (!user){
+    //     return redirect("/")
+    // }
     return(
         <div className={"flex w-full flex-col mx-auto px-4 sm:px-6"}>
             <header className={"sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-white"}>
@@ -24,7 +32,7 @@ export default function DashboardLayout(){
                         </Button>
                     </SheetTrigger>
                     <SheetContent side={"left"}>
-                        <nav className={"grid gap-6 text-lg mt-4 font-medium"}>
+                        <nav className={"flex flex-col justify-center items-center gap-6 text-lg mt-4 font-medium"}>
                             <DashboardNavigation />
                         </nav>
                     </SheetContent>
@@ -38,12 +46,15 @@ export default function DashboardLayout(){
                     <DropdownMenuContent align={"end"}>
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator/>
-                        <DropdownMenuLabel className={"flex items-center"}>
-                            <LogOut className="mr-2 h-4 w-4" /> Log Out
+                        <DropdownMenuLabel>
+                            <LoginLink className={"flex items-center"}>
+                                <LogOut className="mr-2 h-4 w-4" /> Log Out
+                            </LoginLink>
                         </DropdownMenuLabel>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </header>
+            {children}
         </div>
     )
 }
