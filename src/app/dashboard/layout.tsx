@@ -54,7 +54,9 @@ export default async function DashboardLayout({children} : {children : React.Rea
                     </DropdownMenuContent>
                 </DropdownMenu>
             </header>
-            {children}
+            <main className={"my-5"}>
+                {children}
+            </main>
         </div>
     )
 }

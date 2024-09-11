@@ -1,7 +1,5 @@
+import DashboardComponent from "@/components/dashboard";
+
 export default function Dashboard(){
-    return(
-        <div>
-            hello
-        </div>
-    )
+    return<DashboardComponent/>
 }
