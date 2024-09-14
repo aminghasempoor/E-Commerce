@@ -9,16 +9,16 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {getKindeServerSession, LoginLink} from "@kinde-oss/kinde-auth-nextjs/server";
+import {getKindeServerSession, LogoutLink} from "@kinde-oss/kinde-auth-nextjs/server";
 import {redirect} from "next/navigation";
 import React from "react";
 
 export default async function DashboardLayout({children} : {children : React.ReactNode}){
     const {getUser} = getKindeServerSession()
     const user = await getUser()
-    // if (!user){
-    //     return redirect("/")
-    // }
+    if (!user){
+        return redirect("/")
+    }
     return(
         <div className={"flex w-full flex-col mx-auto px-4 sm:px-6"}>
             <header className={"sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-white"}>
@@ -47,9 +47,9 @@ export default async function DashboardLayout({children} : {children : React.Rea
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator/>
                         <DropdownMenuLabel>
-                            <LoginLink className={"flex items-center"}>
+                            <LogoutLink className={"flex items-center"}>
                                 <LogOut className="mr-2 h-4 w-4" /> Log Out
-                            </LoginLink>
+                            </LogoutLink>
                         </DropdownMenuLabel>
                     </DropdownMenuContent>
                 </DropdownMenu>
