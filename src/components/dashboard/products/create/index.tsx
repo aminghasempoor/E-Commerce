@@ -1,6 +1,6 @@
 "use client"
 import {Button} from "@/components/ui/button";
-import {ChevronLeft} from "lucide-react";
+import {ChevronLeft, XIcon} from "lucide-react";
 import Link from "next/link";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
@@ -9,10 +9,32 @@ import {Input} from "@/components/ui/input";
 import {Switch} from "@/components/ui/switch";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {UploadDropzone} from "@/lib/uploadThings";
+import {useFormState} from "react-dom";
+import {CreateProduct} from "@/app/action";
+import {useForm} from "@conform-to/react";
+import {parseWithZod} from "@conform-to/zod";
+import {productSchema} from "@/lib/zodSchema";
+import {useState} from "react";
+import Image from "next/image";
+import {categories} from "@/lib/categories";
 
 function CreateProductComponent() {
+    const [images, setImages] = useState<string[]>([])
+    const [lastResult, action] = useFormState(CreateProduct, undefined)
+    const [form, fields] = useForm({
+        lastResult,
+        onValidate({formData}) {
+            return parseWithZod(formData, {schema: productSchema})
+        },
+        shouldValidate: "onBlur",
+        shouldRevalidate: "onInput"
+    })
+
+    const handleDelete = (index: number) => {
+        setImages(images.filter((_, i) => i !== index));
+    };
     return (
-        <form>
+        <form id={form.id} onSubmit={form.onSubmit} action={action}>
             <div className={"flex items-center gap-4"}>
                 <Button variant={"outline"} size={"icon"} asChild>
                     <Link href={"/dashboard/products"}>
@@ -32,27 +54,53 @@ function CreateProductComponent() {
                             <Label>Name</Label>
                             <Input
                                 type="text"
+                                key={fields.name.key}
+                                name={fields.name.name}
+                                defaultValue={fields.name.initialValue}
                                 className="w-full"
                                 placeholder="Product Name"
                             />
+                            <p className={"text-red-500"}>{fields.name.errors}</p>
                         </div>
                         <div className={"flex flex-col gap-3"}>
                             <Label>Description</Label>
-                            <Textarea placeholder={"Write your description"}/>
+                            <Textarea
+                                key={fields.description.key}
+                                name={fields.description.name}
+                                defaultValue={fields.description.initialValue}
+                                placeholder={"Write your description"}
+                            />
+                            <p className={"text-red-500"}>{fields.description.errors}</p>
                         </div>
                         <div className={"flex flex-col gap-3"}>
                             <Label>Price</Label>
-                            <Input type={"number"} placeholder={"$55"}/>
+                            <Input
+                                key={fields.price.key}
+                                name={fields.price.name}
+                                defaultValue={fields.price.initialValue}
+                                type={"number"}
+                                placeholder={"$55"}
+                            />
+                            <p className={"text-red-500"}>{fields.price.errors}</p>
                         </div>
                         <div className="flex flex-col gap-3">
                             <Label>Featured Product</Label>
-                            <Switch/>
+                            <Switch
+                                key={fields.isFeatured.key}
+                                name={fields.isFeatured.name}
+                                defaultValue={fields.isFeatured.initialValue}
+                            />
+                            <p className={"text-red-500"}>{fields.isFeatured.errors}</p>
                         </div>
                         <div className="flex flex-col gap-3">
                             <Label>Status</Label>
-                            <Select>
+                            <Select
+                                key={fields.status.key}
+                                name={fields.status.name}
+                                defaultValue={fields.status.initialValue}
+                            >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select Status" />
+                                    <SelectValue placeholder="Select Status"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="draft">Draft</SelectItem>
@@ -60,26 +108,77 @@ function CreateProductComponent() {
                                     <SelectItem value="archived">Archived</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <p className={"text-red-500"}>{fields.status.errors}</p>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <Label>Category</Label>
+                            <Select
+                                key={fields.category.key}
+                                name={fields.category.name}
+                                defaultValue={fields.category.initialValue}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories.map((category) => (
+                                        <SelectItem key={category.id} value={category.name}>
+                                            {category.title}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-red-500">{fields.category.errors}</p>
                         </div>
                         <div className="flex flex-col gap-3">
                             <Label>Images</Label>
-                            <UploadDropzone
-                                className={"ut-button:bg-rose-600 ut-label:text-lg ut-allowed-content:ut-uploading:text-rose-300"}
-                                onClientUploadComplete={(res)=>{
-                                    alert(res)
-                                    console.log(res)
-                                }}
-                                onUploadError={(err)=>{
-                                    alert(err)
-                                    console.log(err)
-                                }}
-                                endpoint={"imageUploader"}
+                            <input
+                                type="hidden"
+                                value={images}
+                                key={fields.images.key}
+                                name={fields.images.name}
+                                defaultValue={fields.images.initialValue as never}
                             />
+                            {images.length > 0 ? (
+                                <div className="flex gap-5">
+                                    {images.map((image, index) => (
+                                        <div key={index} className="relative w-[100px] h-[100px]">
+                                            <Image
+                                                height={100}
+                                                width={100}
+                                                src={image}
+                                                alt="Product Image"
+                                                className="w-full h-full object-cover rounded-lg border"
+                                            />
+
+                                            <button
+                                                onClick={() => handleDelete(index)}
+                                                type="button"
+                                                className="absolute -top-3 -right-3 bg-red-500 p-2 rounded-lg text-white"
+                                            >
+                                                <XIcon className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <UploadDropzone
+                                    endpoint="imageUploader"
+                                    className={"ut-button:bg-rose-600 ut-label:text-lg ut-allowed-content:ut-uploading:text-rose-300"}
+                                    onClientUploadComplete={(res) => {
+                                        setImages(res.map((r) => r.url));
+                                    }}
+                                    onUploadError={() => {
+                                        alert("Something went wrong");
+                                    }}
+                                />
+                            )}
+                            <p className="text-red-500">{fields.images.errors}</p>
                         </div>
                     </div>
                 </CardContent>
                 <CardFooter className={'flex justify-end'}>
-                    <Button>Submit</Button>
+                    <Button type={"submit"}>Submit</Button>
                 </CardFooter>
             </Card>
         </form>
