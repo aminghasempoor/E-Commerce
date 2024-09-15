@@ -29,8 +29,9 @@ model Product {
   status      ProductStatus
   price       Int
   images      String[]
-  createdAt   DateTime      @default(now())
   category    Category
+  isFeatured  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
 }
 
 enum ProductStatus {
