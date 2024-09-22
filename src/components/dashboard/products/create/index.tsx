@@ -17,6 +17,7 @@ import {productSchema} from "@/lib/zodSchema";
 import {useState} from "react";
 import Image from "next/image";
 import {categories} from "@/lib/categories";
+import {SubmitButton} from "@/core/components/SubmitButton";
 
 function CreateProductComponent() {
     const [images, setImages] = useState<string[]>([])
@@ -178,7 +179,7 @@ function CreateProductComponent() {
                     </div>
                 </CardContent>
                 <CardFooter className={'flex justify-end'}>
-                    <Button type={"submit"}>Submit</Button>
+                    <SubmitButton text={"SUBMIT"} variant={"default"}/>
                 </CardFooter>
             </Card>
         </form>
